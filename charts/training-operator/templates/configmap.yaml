@@ -1,0 +1,17 @@
+{{- if .Values.pytorchInitContainer.customTemplate }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "training-operator.fullname" . }}-init-container-template
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "training-operator.labels" . | nindent 4 }}
+data:
+  initContainer.yaml: |
+    - name: init-pytorch
+      image: {{"{{"}}.InitContainerImage{{"}}"}}
+      imagePullPolicy: {{ .Values.pytorchInitContainer.imagePullPolicy | default "IfNotPresent" }}
+      resources:
+        {{- toYaml .Values.pytorchInitContainer.resources | nindent 8 }}
+      command: ['sh', '-c', 'err=1;for i in $(seq {{"{{"}}.MaxTries{{"}}"}}); do if getent hosts {{"{{"}}.MasterAddr{{"}}"}}; then err=0 && break; fi;echo waiting for master; sleep {{ .Values.pytorchInitContainer.sleepSeconds | default 2 }}; done; exit $err']
+{{- end }}

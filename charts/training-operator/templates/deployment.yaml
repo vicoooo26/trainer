@@ -1,0 +1,142 @@
+{{- if and (gt (int .Values.replicas) 1) (not .Values.leaderElection.enable) }}
+{{- fail "leaderElection.enable must be true when replicas > 1 to prevent duplicate reconciliations" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "training-operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    control-plane: kubeflow-training-operator
+    {{- include "training-operator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      {{- include "training-operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        control-plane: kubeflow-training-operator
+        {{- include "training-operator.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "training-operator.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: training-operator
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /manager
+          args:
+            - --pytorch-init-container-image={{ .Values.pytorchInitContainer.image.repository }}:{{ .Values.pytorchInitContainer.image.tag }}
+            - --pytorch-init-container-max-tries={{ .Values.pytorchInitContainer.maxTries | default 100 }}
+            - --mpi-kubectl-delivery-image={{ .Values.mpiKubectlDeliveryImage.repository }}:{{ .Values.mpiKubectlDeliveryImage.tag }}
+            - --webhook-service-name={{ include "training-operator.fullname" . }}
+            - --webhook-secret-name={{ include "training-operator.webhookCertSecretName" . }}
+            - --leader-elect={{ .Values.leaderElection.enable }}
+            {{- if .Values.mpi.disableRBACManagement }}
+            - --disable-mpi-rbac-management=true
+            {{- end }}
+          ports:
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
+            - containerPort: 8081
+              name: healthz
+              protocol: TCP
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+          env:
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+            {{- if .Values.pytorchInitContainer.customTemplate }}
+            - mountPath: /etc/config
+              name: init-container-template
+              readOnly: true
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: {{ include "training-operator.webhookCertSecretName" . }}
+        {{- if .Values.pytorchInitContainer.customTemplate }}
+        - name: init-container-template
+          configMap:
+            name: {{ include "training-operator.fullname" . }}-init-container-template
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
+      {{- else if gt (int .Values.replicas) 1 }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "training-operator.selectorLabels" . | nindent 20 }}
+                topologyKey: kubernetes.io/hostname
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

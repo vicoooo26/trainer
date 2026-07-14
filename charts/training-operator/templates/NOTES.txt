@@ -1,0 +1,21 @@
+Thank you for installing {{ .Chart.Name }} {{ .Chart.Version }}.
+
+The Kubeflow Training Operator has been deployed in namespace {{ .Release.Namespace }}.
+
+1. Check the training-operator pod status:
+
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "training-operator.name" . }}
+
+2. Verify the webhook service is running:
+
+   kubectl get svc -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "training-operator.name" . }}
+
+3. Confirm the custom resource definitions are registered:
+
+   kubectl get crds | grep kubeflow.org
+
+4. Verify the admission webhook is serving:
+
+   kubectl get validatingwebhookconfigurations -l app.kubernetes.io/name={{ include "training-operator.name" . }}
+
+For more information, visit: https://github.com/kubeflow/trainer

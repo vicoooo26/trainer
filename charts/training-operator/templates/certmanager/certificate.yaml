@@ -1,0 +1,28 @@
+{{- if .Values.certManager.enable }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "training-operator.fullname" . }}-webhook-cert
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "training-operator.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "training-operator.webhookCertSecretName" . }}
+  issuerRef:
+  {{- if not .Values.certManager.issuerRef }}
+    group: cert-manager.io
+    kind: Issuer
+    name: {{ include "training-operator.fullname" . }}-self-signed-issuer
+  {{- else }}
+    {{- toYaml .Values.certManager.issuerRef | nindent 4 }}
+  {{- end }}
+  commonName: {{ include "training-operator.fullname" . }}-webhook
+  dnsNames:
+    - {{ include "training-operator.fullname" . }}.{{ .Release.Namespace }}.svc
+    - {{ include "training-operator.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  duration: {{ .Values.certManager.duration | default "8760h" }}
+  renewBefore: {{ .Values.certManager.renewBefore | default "720h" }}
+  usages:
+    - server auth
+    - client auth
+{{- end }}

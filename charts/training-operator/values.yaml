@@ -1,0 +1,142 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Number of deployment replicas. Set to 2+ for high availability.
+replicas: 2
+
+image:
+  repository: registry-cn-beijing.ack.aliyuncs.com/acs/training-operator
+  # -- Image tag
+  tag: v1.9.3-62f5b57-aliyun
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- List of image pull secret names for private registries
+imagePullSecrets: []
+
+# -- MPI kubectl delivery image (passed as --mpi-kubectl-delivery-image arg)
+mpiKubectlDeliveryImage:
+  repository: registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery
+  tag: "50b5d5b-aliyun"
+
+# -- PyTorch init container configuration
+pytorchInitContainer:
+  # -- When true, creates a ConfigMap with a custom init container template
+  # (getent hosts) and mounts it at /etc/config/initContainer.yaml.
+  # When false, the operator uses its built-in Go template.
+  customTemplate: true
+  # -- Init container image (passed as --pytorch-init-container-image arg)
+  image:
+    repository: registry-cn-beijing.ack.aliyuncs.com/acs/alpine
+    tag: "3.22.2"
+  # -- Image pull policy for the init container.
+  imagePullPolicy: IfNotPresent
+  # -- Number of DNS resolution attempts for the init container. Passed to the
+  # operator via the --pytorch-init-container-max-tries CLI flag.
+  maxTries: 100
+  # -- Sleep interval (seconds) between DNS resolution attempts in the init container command.
+  sleepSeconds: 2
+  # -- Resource requests and limits for the init container.
+  resources:
+    limits:
+      cpu: 100m
+      memory: 20Mi
+    requests:
+      cpu: 50m
+      memory: 10Mi
+
+# -- MPI controller configuration
+mpi:
+  # -- When true, the operator passes --disable-mpi-rbac-management and will not
+  # create ServiceAccount, Role, or RoleBinding for MPIJobs. Users must pre-provide
+  # a ServiceAccount with sufficient permissions via the launcher pod template.
+  disableRBACManagement: true
+
+# -- Cert-manager integration for webhook certificates
+certManager:
+  # -- Use cert-manager to generate webhook certs. If false, operator's
+  # built-in cert-controller populates the Secret automatically.
+  enable: false
+  # -- Issuer reference. If empty, a self-signed Issuer is created.
+  issuerRef: {}
+  # -- Certificate duration.
+  duration: "8760h"
+  # -- Certificate renewal window before expiry.
+  renewBefore: "720h"
+
+# -- Test pod image
+testImage:
+  repository: registry-cn-beijing.ack.aliyuncs.com/acs/busybox
+  tag: stable
+
+serviceAccount:
+  # -- Create a new service account
+  create: true
+  # -- Service account name. If empty, a name is derived from the release name.
+  name: ""
+
+service:
+  type: ClusterIP
+  metricsPort: 8080
+  webhookPort: 443
+  annotations:
+    prometheus.io/path: /metrics
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+
+# -- Webhook configuration
+webhook:
+  # -- Timeout for admission webhook requests (in seconds).
+  timeoutSeconds: 30
+
+# -- Pod annotations
+podAnnotations:
+  sidecar.istio.io/inject: "false"
+
+# -- Pod security context
+podSecurityContext: {}
+
+# -- Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 65532
+  readOnlyRootFilesystem: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Resource requests and limits
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity
+affinity: {}
+
+# -- Pod Disruption Budget configuration
+podDisruptionBudget:
+  # -- Enable PodDisruptionBudget for the operator deployment
+  enable: true
+  # -- Minimum number of available pods. Cannot be set together with maxUnavailable.
+  minAvailable: 1
+  # -- Maximum number of unavailable pods. Cannot be set together with minAvailable.
+  # maxUnavailable: 0
+
+# -- Leader election configuration
+leaderElection:
+  # -- Enable leader election. When true, passes --leader-elect to the operator.
+  # Required when replicas > 1 to prevent duplicate reconciliations.
+  enable: true
+
+# -- Termination grace period seconds
+terminationGracePeriodSeconds: 10

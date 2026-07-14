@@ -1,0 +1,121 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validator.training-operator.kubeflow.org
+  labels:
+    {{- include "training-operator.labels" . | nindent 4 }}
+  {{- if .Values.certManager.enable }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "training-operator.fullname" . }}-webhook-cert
+  {{- end }}
+webhooks:
+- name: validator.jaxjob.training-operator.kubeflow.org
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "training-operator.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.service.webhookPort }}
+      path: /validate-kubeflow-org-v1-jaxjob
+  rules:
+  - apiGroups:
+    - kubeflow.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - jaxjobs
+  failurePolicy: Fail
+  sideEffects: None
+  timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
+- name: validator.paddlejob.training-operator.kubeflow.org
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "training-operator.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.service.webhookPort }}
+      path: /validate-kubeflow-org-v1-paddlejob
+  rules:
+  - apiGroups:
+    - kubeflow.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - paddlejobs
+  failurePolicy: Fail
+  sideEffects: None
+  timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
+- name: validator.pytorchjob.training-operator.kubeflow.org
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "training-operator.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.service.webhookPort }}
+      path: /validate-kubeflow-org-v1-pytorchjob
+  rules:
+  - apiGroups:
+    - kubeflow.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pytorchjobs
+  failurePolicy: Fail
+  sideEffects: None
+  timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
+- name: validator.tfjob.training-operator.kubeflow.org
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "training-operator.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.service.webhookPort }}
+      path: /validate-kubeflow-org-v1-tfjob
+  rules:
+  - apiGroups:
+    - kubeflow.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - tfjobs
+  failurePolicy: Fail
+  sideEffects: None
+  timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
+- name: validator.xgboostjob.training-operator.kubeflow.org
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "training-operator.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      port: {{ .Values.service.webhookPort }}
+      path: /validate-kubeflow-org-v1-xgboostjob
+  rules:
+  - apiGroups:
+    - kubeflow.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - xgboostjobs
+  failurePolicy: Fail
+  sideEffects: None
+  timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}

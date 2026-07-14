@@ -1,0 +1,23 @@
+{{- if .Values.podDisruptionBudget.enable }}
+{{- $apiVersion := "policy/v1" -}}
+{{- if semverCompare "<1.21-0" .Capabilities.KubeVersion.Version -}}
+{{- $apiVersion = "policy/v1beta1" -}}
+{{- end }}
+apiVersion: {{ $apiVersion }}
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "training-operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "training-operator.labels" . | nindent 4 }}
+spec:
+  {{- if ne .Values.podDisruptionBudget.minAvailable nil }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if ne .Values.podDisruptionBudget.maxUnavailable nil }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "training-operator.selectorLabels" . | nindent 6 }}
+{{- end }}

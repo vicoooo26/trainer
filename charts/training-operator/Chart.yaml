@@ -1,0 +1,19 @@
+apiVersion: v2
+name: training-operator
+description: Kubeflow Training Operator for ACK - manages distributed training jobs
+type: application
+version: 1.9.3
+appVersion: v1.9.3
+kubeVersion: ">= 1.19.0-0"
+keywords:
+  - kubeflow
+  - training
+  - machine-learning
+  - ack
+icon: file://logo.svg
+home: https://github.com/kubeflow/trainer
+sources:
+  - https://github.com/kubeflow/trainer/tree/v1.9.3
+maintainers:
+  - email: chubo.cb@alibaba-inc.com
+    name: Bo Chu
