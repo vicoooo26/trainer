@@ -69,15 +69,6 @@
         "disableRBACManagement": { "type": "boolean" }
       }
     },
-    "certManager": {
-      "type": "object",
-      "properties": {
-        "enable": { "type": "boolean" },
-        "issuerRef": { "type": "object" },
-        "duration": { "type": "string" },
-        "renewBefore": { "type": "string" }
-      }
-    },
     "testImage": {
       "type": "object",
       "properties": {

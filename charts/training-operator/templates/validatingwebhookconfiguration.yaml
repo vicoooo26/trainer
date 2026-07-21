@@ -4,10 +4,6 @@ metadata:
   name: validator.training-operator.kubeflow.org
   labels:
     {{- include "training-operator.labels" . | nindent 4 }}
-  {{- if .Values.certManager.enable }}
-  annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "training-operator.fullname" . }}-webhook-cert
-  {{- end }}
 webhooks:
 - name: validator.jaxjob.training-operator.kubeflow.org
   admissionReviewVersions:

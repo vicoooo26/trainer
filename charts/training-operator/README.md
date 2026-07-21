@@ -67,16 +67,6 @@ This removes all the Kubernetes resources associated with the chart and deletes 
 
 See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall) for command documentation.
 
-### Enable cert-manager for webhook certificates
-
-By default, the Training Operator uses its built-in cert-controller to populate the webhook certificate Secret automatically. To use cert-manager instead:
-
-```shell
-helm install training-operator aliyun-incubator/training-operator \
-    --namespace kubeflow \
-    --set certManager.enable=true
-```
-
 ### High Availability
 
 To run the Training Operator with high availability (avoid single point of failure), set `replicas` to 2 or more:
@@ -112,10 +102,6 @@ When `replicas > 1`:
 | mpiKubectlDeliveryImage.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery"` | MPI kubectl delivery image repository. |
 | mpiKubectlDeliveryImage.tag | string | `"50b5d5b-aliyun"` | MPI kubectl delivery image tag. |
 | mpi.disableRBACManagement | bool | `true` | When true, operator will not create SA/Role/RoleBinding for MPIJobs. |
-| certManager.enable | bool | `false` | Use cert-manager to generate webhook certs. If false, operator's built-in cert-controller populates the Secret automatically. |
-| certManager.issuerRef | object | `{}` | Issuer reference. If empty, a self-signed Issuer is created. |
-| certManager.duration | string | `"8760h"` | Certificate duration. |
-| certManager.renewBefore | string | `"720h"` | Certificate renewal window before expiry. |
 | serviceAccount.create | bool | `true` | Create a new service account. |
 | serviceAccount.name | string | `""` | Service account name. If empty, a name is derived from the release name. |
 | service.type | string | `"ClusterIP"` | Service type. |

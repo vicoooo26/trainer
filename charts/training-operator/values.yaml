@@ -52,18 +52,6 @@ mpi:
   # a ServiceAccount with sufficient permissions via the launcher pod template.
   disableRBACManagement: true
 
-# -- Cert-manager integration for webhook certificates
-certManager:
-  # -- Use cert-manager to generate webhook certs. If false, operator's
-  # built-in cert-controller populates the Secret automatically.
-  enable: false
-  # -- Issuer reference. If empty, a self-signed Issuer is created.
-  issuerRef: {}
-  # -- Certificate duration.
-  duration: "8760h"
-  # -- Certificate renewal window before expiry.
-  renewBefore: "720h"
-
 # -- Test pod image
 testImage:
   repository: registry-cn-beijing.ack.aliyuncs.com/acs/busybox
