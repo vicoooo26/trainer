@@ -17,7 +17,7 @@ imagePullSecrets: []
 # -- MPI kubectl delivery image (passed as --mpi-kubectl-delivery-image arg)
 mpiKubectlDeliveryImage:
   repository: registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery
-  tag: "50b5d5b-aliyun"
+  tag: "v1.9.3-6ccb670-aliyun"
 
 # -- PyTorch init container configuration
 pytorchInitContainer:
@@ -50,7 +50,7 @@ mpi:
   # -- When true, the operator passes --disable-mpi-rbac-management and will not
   # create ServiceAccount, Role, or RoleBinding for MPIJobs. Users must pre-provide
   # a ServiceAccount with sufficient permissions via the launcher pod template.
-  disableRBACManagement: true
+  disableRBACManagement: false
 
 # -- Test pod image
 testImage:

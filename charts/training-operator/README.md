@@ -4,7 +4,7 @@
 
 A Helm chart for deploying the Kubeflow Training Operator on Kubernetes. The Training Operator manages distributed training jobs for machine learning frameworks including JAX, MPI, PaddlePaddle, PyTorch, TensorFlow, and XGBoost.
 
-**Homepage:** <https://github.com/kubeflow/trainer>
+**Homepage:** <https://github.com/kubeflow/training-operator/tree/release-1.9>
 
 ## Introduction
 
@@ -24,14 +24,18 @@ This Helm chart installs the Kubeflow Training Operator to your Kubernetes clust
 
 ### Install the chart
 
+Clone this repository and install from the local chart:
+
 ```shell
-helm install [RELEASE_NAME] aliyun-incubator/training-operator
+git clone https://github.com/AliyunContainerService/trainer.git
+cd trainer
+helm install [RELEASE_NAME] ./charts/training-operator
 ```
 
 For example, if you want to create a release with name `training-operator` in the `kubeflow` namespace:
 
 ```shell
-helm install training-operator aliyun-incubator/training-operator \
+helm install training-operator ./charts/training-operator \
     --namespace kubeflow \
     --create-namespace
 ```
@@ -43,7 +47,7 @@ See [helm install](https://helm.sh/docs/helm/helm_install) for command documenta
 ### Upgrade the chart
 
 ```shell
-helm upgrade [RELEASE_NAME] aliyun-incubator/training-operator [flags]
+helm upgrade [RELEASE_NAME] ./charts/training-operator [flags]
 ```
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade) for command documentation.
@@ -53,7 +57,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade) for command documenta
 By default, this chart creates a ConfigMap that overrides the PyTorch init container template to use `getent hosts` (forcing DNS A-record lookups). This prevents spurious failures in IPv4-only environments. If your environment relies on other DNS record types (e.g., AAAA for IPv6), disable this feature:
 
 ```shell
-helm upgrade [RELEASE_NAME] aliyun-incubator/training-operator \
+helm upgrade [RELEASE_NAME] ./charts/training-operator \
     --set pytorchInitContainer.customTemplate=false
 ```
 
@@ -67,12 +71,16 @@ This removes all the Kubernetes resources associated with the chart and deletes 
 
 See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall) for command documentation.
 
+### Upgrading CRDs
+
+CRDs under `crds/` are not managed by Helm's upgrade process. When upgrading between chart versions, apply CRD updates manually.
+
 ### High Availability
 
 To run the Training Operator with high availability (avoid single point of failure), set `replicas` to 2 or more:
 
 ```shell
-helm install training-operator aliyun-incubator/training-operator \
+helm install training-operator ./charts/training-operator \
     --namespace kubeflow \
     --set replicas=2
 ```
@@ -101,7 +109,7 @@ When `replicas > 1`:
 | pytorchInitContainer.resources | object | `{"limits":{"cpu":"100m","memory":"20Mi"},"requests":{"cpu":"50m","memory":"10Mi"}}` | Resource requests and limits for the init container. |
 | mpiKubectlDeliveryImage.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery"` | MPI kubectl delivery image repository. |
 | mpiKubectlDeliveryImage.tag | string | `"50b5d5b-aliyun"` | MPI kubectl delivery image tag. |
-| mpi.disableRBACManagement | bool | `true` | When true, operator will not create SA/Role/RoleBinding for MPIJobs. |
+| mpi.disableRBACManagement | bool | `false` | When true, operator will not create SA/Role/RoleBinding for MPIJobs. |
 | serviceAccount.create | bool | `true` | Create a new service account. |
 | serviceAccount.name | string | `""` | Service account name. If empty, a name is derived from the release name. |
 | service.type | string | `"ClusterIP"` | Service type. |
@@ -127,9 +135,9 @@ When `replicas > 1`:
 
 | Name | Url |
 | ---- | --- |
-| Kubeflow Training | <https://github.com/kubeflow/trainer> |
+| Kubeflow Training | <https://github.com/kubeflow/training-operator> |
 
 ## Links
 
-- **Upstream project:** <https://github.com/kubeflow/trainer/tree/v1.9.3>
-- **Kubeflow Trainer documentation:** <https://github.com/kubeflow/trainer>
+- **Upstream project:** <https://github.com/kubeflow/training-operator/tree/release-1.9>
+- **Kubeflow Trainer documentation:** <https://github.com/kubeflow/training-operator>

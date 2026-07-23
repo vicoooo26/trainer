@@ -13,7 +13,7 @@ spec:
       image: "{{ .Values.testImage.repository }}:{{ .Values.testImage.tag }}"
       imagePullPolicy: {{ .Values.image.pullPolicy }}
       command: ['wget']
-      args: ['{{ include "training-operator.fullname" . }}:{{ .Values.service.metricsPort }}/metrics']
+      args: ['-q', '-O-', '{{ include "training-operator.fullname" . }}:{{ .Values.service.metricsPort }}/metrics']
       {{- with .Values.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}

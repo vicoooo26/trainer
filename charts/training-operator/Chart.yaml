@@ -11,9 +11,9 @@ keywords:
   - machine-learning
   - ack
 icon: file://logo.svg
-home: https://github.com/kubeflow/trainer
+home: https://github.com/kubeflow/training-operator
 sources:
-  - https://github.com/kubeflow/trainer/tree/v1.9.3
+  - https://github.com/kubeflow/training-operator/tree/release-1.9
 maintainers:
   - email: chubo.cb@alibaba-inc.com
     name: Bo Chu

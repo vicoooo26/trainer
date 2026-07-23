@@ -18,4 +18,4 @@ The Kubeflow Training Operator has been deployed in namespace {{ .Release.Namesp
 
    kubectl get validatingwebhookconfigurations -l app.kubernetes.io/name={{ include "training-operator.name" . }}
 
-For more information, visit: https://github.com/kubeflow/trainer
+For more information, visit: https://github.com/kubeflow/training-operator/tree/release-1.9
