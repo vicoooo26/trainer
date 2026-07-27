@@ -36,4 +36,5 @@ exclude: |
     sdk/python/docs/.*|
     sdk/python/.openapi-generator/VERSION|
     sdk/python/kubeflow/__init__.py|
+    charts/training-operator/templates/.*|
   )$
