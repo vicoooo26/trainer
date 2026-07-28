@@ -97,7 +97,7 @@ When `replicas > 1`:
 | fullnameOverride | string | `""` | String to fully override release name. |
 | replicas | int | `2` | Number of deployment replicas. Set to 2+ for HA. |
 | image.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/training-operator"` | Image repository. |
-| image.tag | string | `"v1.9.3-62f5b57-aliyun"` | Image tag. |
+| image.tag | string | `"15cc1de-aliyun"` | Image tag. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
 | imagePullSecrets | list | `[]` | List of image pull secret names for private registries. |
 | pytorchInitContainer.customTemplate | bool | `true` | When true, creates a ConfigMap with a custom init container template (getent hosts) and mounts it at /etc/config/initContainer.yaml. When false, the operator uses its built-in Go template. |
@@ -108,7 +108,7 @@ When `replicas > 1`:
 | pytorchInitContainer.sleepSeconds | int | `2` | Sleep interval (seconds) between DNS resolution attempts. |
 | pytorchInitContainer.resources | object | `{"limits":{"cpu":"100m","memory":"20Mi"},"requests":{"cpu":"50m","memory":"10Mi"}}` | Resource requests and limits for the init container. |
 | mpiKubectlDeliveryImage.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery"` | MPI kubectl delivery image repository. |
-| mpiKubectlDeliveryImage.tag | string | `"50b5d5b-aliyun"` | MPI kubectl delivery image tag. |
+| mpiKubectlDeliveryImage.tag | string | `"15cc1de-aliyun"` | MPI kubectl delivery image tag. |
 | mpi.disableRBACManagement | bool | `false` | When true, operator will not create SA/Role/RoleBinding for MPIJobs. |
 | serviceAccount.create | bool | `true` | Create a new service account. |
 | serviceAccount.name | string | `""` | Service account name. If empty, a name is derived from the release name. |
