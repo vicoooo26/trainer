@@ -15,7 +15,7 @@ This Helm chart installs the Kubeflow Training Operator to your Kubernetes clust
 - Helm >= 3
 - Kubernetes >= 1.19
 
-**Note:** the `training-operator` requires the following **cluster-scoped** RBAC permissions, including but not limited to:
+ **Note:** this chart installs cluster-scoped resources (CRDs, ClusterRole, ValidatingWebhookConfiguration) and therefore requires cluster-scoped RBAC permissions. It is intended to be installed once per cluster; installing multiple releases will result in resource name conflicts.
   - Jobs: `create`, `get`, `list`, `watch`, `update`, `delete`
   - Pods: `create`, `get`, `list`, `watch`, `delete`
   - Services: `create`, `get`, `list`, `watch`
