@@ -225,7 +225,7 @@ rules:
   - get
   - patch
   - update
-{{- if not .Values.mpi.disableRBACManagement }}
+{{- if not .Values.mpiDisableRBACManagement }}
 - apiGroups:
   - ""
   resources:

@@ -6,6 +6,81 @@ A Helm chart for deploying the Kubeflow Training Operator on Kubernetes. The Tra
 
 **Homepage:** <https://github.com/kubeflow/training-operator/tree/release-1.9>
 
+---
+
+## Notes
+
+To mitigate security risks from over-privileged access, this component has refined its auto-created RBAC rules by removing broad, high-privilege configurations. Since the Launcher Pod requires read and exec access to Worker Pods, users must manually manage permissions for the ServiceAccount used by MPIJobs. Please refer to the example below, which lists the minimum required permissions:
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mpi
+  namespace: default
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resourceNames:
+  #  <job-name>-worker-<index>
+  - mpi-worker-0
+  - mpi-worker-1
+  resources:
+  - pods/exec
+  verbs:
+  - create
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mpi
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mpi
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mpi
+subjects:
+- kind: ServiceAccount
+  name: mpi
+  namespace: default
+---
+apiVersion: kubeflow.org/v1
+kind: MPIJob
+metadata:
+  name: mpi
+  namespace: default
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      template:
+        spec:
+          ...
+          serviceAccountName: mpi
+      ...
+    Worker:
+      replicas: 2
+      ...
+  ...
+```
+
+Users assume full responsibility for any security issues arising from manually granting elevated permissions.
+
+---
+
 ## Introduction
 
 This Helm chart installs the Kubeflow Training Operator to your Kubernetes cluster. The Training Operator provides Kubernetes custom resources that make it easy to run distributed training workloads. It supports JAXJob, MPIJob, PaddleJob, PyTorchJob, TensorFlowJob, and XGBoostJob CRDs.
@@ -91,45 +166,45 @@ When `replicas > 1`:
 
 ## Values
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| nameOverride | string | `""` | String to partially override release name. |
-| fullnameOverride | string | `""` | String to fully override release name. |
-| replicas | int | `2` | Number of deployment replicas. Set to 2+ for HA. |
-| image.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/training-operator"` | Image repository. |
-| image.tag | string | `"15cc1de-aliyun"` | Image tag. |
-| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
-| imagePullSecrets | list | `[]` | List of image pull secret names for private registries. |
-| pytorchInitContainer.customTemplate | bool | `true` | When true, creates a ConfigMap with a custom init container template (getent hosts) and mounts it at /etc/config/initContainer.yaml. When false, the operator uses its built-in Go template. |
-| pytorchInitContainer.image.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/alpine"` | Init container image repository. |
-| pytorchInitContainer.image.tag | string | `"3.22.2"` | Init container image tag. |
-| pytorchInitContainer.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for the init container. |
-| pytorchInitContainer.maxTries | int | `100` | Number of DNS resolution attempts for the init container. Passed to the operator via the --pytorch-init-container-max-tries CLI flag. |
-| pytorchInitContainer.sleepSeconds | int | `2` | Sleep interval (seconds) between DNS resolution attempts. |
-| pytorchInitContainer.resources | object | `{"limits":{"cpu":"100m","memory":"20Mi"},"requests":{"cpu":"50m","memory":"10Mi"}}` | Resource requests and limits for the init container. |
-| mpiKubectlDeliveryImage.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery"` | MPI kubectl delivery image repository. |
-| mpiKubectlDeliveryImage.tag | string | `"15cc1de-aliyun"` | MPI kubectl delivery image tag. |
-| mpi.disableRBACManagement | bool | `false` | When true, operator will not create SA/Role/RoleBinding for MPIJobs. |
-| serviceAccount.create | bool | `true` | Create a new service account. |
-| serviceAccount.name | string | `""` | Service account name. If empty, a name is derived from the release name. |
-| service.type | string | `"ClusterIP"` | Service type. |
-| service.metricsPort | int | `8080` | Metrics service port. |
-| service.webhookPort | int | `443` | Webhook service port. |
-| service.annotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/scrape":"true","prometheus.io/port":"8080"}` | Service annotations. |
-| webhook.timeoutSeconds | int | `30` | Timeout for admission webhook requests in seconds. |
-| podAnnotations | object | `{"sidecar.istio.io/inject":"false"}` | Pod annotations. |
-| podSecurityContext | object | `{}` | Pod security context. |
-| securityContext | object | `{"allowPrivilegeEscalation":false,"runAsNonRoot":true,"runAsUser":65532,"readOnlyRootFilesystem":true,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context. |
-| resources | object | `{"requests":{"memory":"128Mi","cpu":"100m"},"limits":{"memory":"512Mi","cpu":"500m"}}` | Resource requests and limits. |
-| nodeSelector | object | `{}` | Node selector. |
-| tolerations | list | `[]` | Tolerations. |
-| affinity | object | `{}` | Affinity rules. When empty and replicas > 1, a podAntiAffinity is auto-generated. |
-| podDisruptionBudget.enable | bool | `true` | Enable PodDisruptionBudget for the operator deployment. |
-| podDisruptionBudget.minAvailable | int | `1` | Minimum number of available pods. Cannot be set together with maxUnavailable. |
-| leaderElection.enable | bool | `true` | Enable leader election. Passes `--leader-elect` to the operator. Required when replicas > 1. |
-| terminationGracePeriodSeconds | int | `10` | Termination grace period seconds. |
-| testImage.repository | string | `"registry-cn-beijing.ack.aliyuncs.com/acs/busybox"` | Test pod image repository. |
-| testImage.tag | string | `"stable"` | Test pod image tag. |
+| Key | Description | Default |
+|-----|-------------|---------|
+| nameOverride | String to partially override release name. | `""` |
+| fullnameOverride | String to fully override release name. | `""` |
+| replicas | Number of deployment replicas. Set to 2+ for HA. | `2` |
+| image.repository | Image repository. | `"registry-cn-beijing.ack.aliyuncs.com/acs/training-operator"` |
+| image.tag | Image tag. | `"15cc1de-aliyun"` |
+| image.pullPolicy | Image pull policy. | `"IfNotPresent"` |
+| imagePullSecrets | List of image pull secret names for private registries. | `[]` |
+| pytorchInitContainer.customTemplate | When true, creates a ConfigMap with a custom init container template (getent hosts) and mounts it at /etc/config/initContainer.yaml. When false, the operator uses its built-in Go template. | `true` |
+| pytorchInitContainer.image.repository | Init container image repository. | `"registry-cn-beijing.ack.aliyuncs.com/acs/alpine"` |
+| pytorchInitContainer.image.tag | Init container image tag. | `"3.22.2"` |
+| pytorchInitContainer.imagePullPolicy | Image pull policy for the init container. | `"IfNotPresent"` |
+| pytorchInitContainer.maxTries | Number of DNS resolution attempts for the init container. Passed to the operator via the --pytorch-init-container-max-tries CLI flag. | `100` |
+| pytorchInitContainer.sleepSeconds | Sleep interval (seconds) between DNS resolution attempts. | `2` |
+| pytorchInitContainer.resources | Resource requests and limits for the init container. | `{"limits":{"cpu":"100m","memory":"20Mi"},"requests":{"cpu":"50m","memory":"10Mi"}}` |
+| mpiKubectlDeliveryImage.repository | MPI kubectl delivery image repository. | `"registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery"` |
+| mpiKubectlDeliveryImage.tag | MPI kubectl delivery image tag. | `"15cc1de-aliyun"` |
+| mpiDisableRBACManagement | When true, disables auto-provisioning of ServiceAccounts for MPIJobs. This reduces operator's RBAC scope but requires manually setting `serviceAccountName` on the Launcher with a Role granting `get`, `list`, `watch` on `pods` and `create` on `pods/exec`. If unset, it falls back to the namespace's `default` ServiceAccount, which typically lacks permissions and causes job failure. | `false` |
+| serviceAccount.create | Create a new service account. | `true` |
+| serviceAccount.name | Service account name. If empty, a name is derived from the release name. | `""` |
+| service.type | Service type. | `"ClusterIP"` |
+| service.metricsPort | Metrics service port. | `8080` |
+| service.webhookPort | Webhook service port. | `443` |
+| service.annotations | Service annotations. | `{"prometheus.io/path":"/metrics","prometheus.io/scrape":"true","prometheus.io/port":"8080"}` |
+| webhook.timeoutSeconds | Timeout for admission webhook requests in seconds. | `30` |
+| podAnnotations | Pod annotations. | `{"sidecar.istio.io/inject":"false"}` |
+| podSecurityContext | Pod security context. | `{}` |
+| securityContext | Container security context. | `{"allowPrivilegeEscalation":false,"runAsNonRoot":true,"runAsUser":65532,"readOnlyRootFilesystem":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| resources | Resource requests and limits. | `{"requests":{"memory":"128Mi","cpu":"100m"},"limits":{"memory":"512Mi","cpu":"500m"}}` |
+| nodeSelector | Node selector. | `{}` |
+| tolerations | Tolerations. | `[]` |
+| affinity | Affinity rules. When empty and replicas > 1, a podAntiAffinity is auto-generated. | `{}` |
+| podDisruptionBudget.enable | Enable PodDisruptionBudget for the operator deployment. | `true` |
+| podDisruptionBudget.minAvailable | Minimum number of available pods. Cannot be set together with maxUnavailable. | `1` |
+| leaderElection.enable | Enable leader election. Passes `--leader-elect` to the operator. Required when replicas > 1. | `true` |
+| terminationGracePeriodSeconds | Termination grace period seconds. | `10` |
+| testImage.repository | Test pod image repository. | `"registry-cn-beijing.ack.aliyuncs.com/acs/busybox"` |
+| testImage.tag | Test pod image tag. | `"stable"` |
 
 ## Maintainers
 

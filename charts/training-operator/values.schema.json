@@ -63,12 +63,7 @@
         "tag": { "type": "string" }
       }
     },
-    "mpi": {
-      "type": "object",
-      "properties": {
-        "disableRBACManagement": { "type": "boolean" }
-      }
-    },
+    "mpiDisableRBACManagement": { "type": "boolean" },
     "testImage": {
       "type": "object",
       "properties": {

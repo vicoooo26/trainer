@@ -19,6 +19,11 @@ mpiKubectlDeliveryImage:
   repository: registry-cn-beijing.ack.aliyuncs.com/acs/kubectl-delivery
   tag: "15cc1de-aliyun"
 
+# -- When true, the operator passes --disable-mpi-rbac-management and will not
+# create ServiceAccount, Role, or RoleBinding for MPIJobs. Users must pre-provide
+# a ServiceAccount with sufficient permissions via the launcher pod template.
+mpiDisableRBACManagement: false
+
 # -- PyTorch init container configuration
 pytorchInitContainer:
   # -- When true, creates a ConfigMap with a custom init container template
@@ -45,17 +50,10 @@ pytorchInitContainer:
       cpu: 50m
       memory: 10Mi
 
-# -- MPI controller configuration
-mpi:
-  # -- When true, the operator passes --disable-mpi-rbac-management and will not
-  # create ServiceAccount, Role, or RoleBinding for MPIJobs. Users must pre-provide
-  # a ServiceAccount with sufficient permissions via the launcher pod template.
-  disableRBACManagement: false
-
 # -- Test pod image
 testImage:
   repository: registry-cn-beijing.ack.aliyuncs.com/acs/busybox
-  tag: stable
+  tag: "1.35"
 
 serviceAccount:
   # -- Create a new service account

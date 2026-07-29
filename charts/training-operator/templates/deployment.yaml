@@ -24,6 +24,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      priorityClassName: system-cluster-critical
       serviceAccountName: {{ include "training-operator.serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -47,7 +48,7 @@ spec:
             - --webhook-service-name={{ include "training-operator.fullname" . }}
             - --webhook-secret-name={{ include "training-operator.webhookCertSecretName" . }}
             - --leader-elect={{ .Values.leaderElection.enable }}
-            {{- if .Values.mpi.disableRBACManagement }}
+            {{- if .Values.mpiDisableRBACManagement }}
             - --disable-mpi-rbac-management=true
             {{- end }}
           ports:
