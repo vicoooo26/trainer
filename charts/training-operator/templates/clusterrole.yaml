@@ -20,12 +20,7 @@ rules:
   - events
   verbs:
   - create
-  - delete
-  - get
-  - list
   - patch
-  - update
-  - watch
 - apiGroups:
   - ""
   resources:
@@ -36,7 +31,6 @@ rules:
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
   - ""
@@ -48,6 +42,7 @@ rules:
   - get
   - list
   - watch
+  - patch
 - apiGroups:
   - admissionregistration.k8s.io
   resources:
@@ -64,9 +59,7 @@ rules:
   verbs:
   - create
   - delete
-  - get
   - list
-  - patch
   - update
   - watch
 - apiGroups:
@@ -74,12 +67,9 @@ rules:
   resources:
   - jaxjobs
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - kubeflow.org
@@ -92,20 +82,15 @@ rules:
   resources:
   - jaxjobs/status
   verbs:
-  - get
-  - patch
   - update
 - apiGroups:
   - kubeflow.org
   resources:
   - mpijobs
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - kubeflow.org
@@ -118,20 +103,15 @@ rules:
   resources:
   - mpijobs/status
   verbs:
-  - get
-  - patch
   - update
 - apiGroups:
   - kubeflow.org
   resources:
   - paddlejobs
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - kubeflow.org
@@ -144,20 +124,15 @@ rules:
   resources:
   - paddlejobs/status
   verbs:
-  - get
-  - patch
   - update
 - apiGroups:
   - kubeflow.org
   resources:
   - pytorchjobs
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - kubeflow.org
@@ -170,20 +145,15 @@ rules:
   resources:
   - pytorchjobs/status
   verbs:
-  - get
-  - patch
   - update
 - apiGroups:
   - kubeflow.org
   resources:
   - tfjobs
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - kubeflow.org
@@ -196,20 +166,15 @@ rules:
   resources:
   - tfjobs/status
   verbs:
-  - get
-  - patch
   - update
 - apiGroups:
   - kubeflow.org
   resources:
   - xgboostjobs
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - kubeflow.org
@@ -222,8 +187,6 @@ rules:
   resources:
   - xgboostjobs/status
   verbs:
-  - get
-  - patch
   - update
 {{- if not .Values.mpiDisableRBACManagement }}
 - apiGroups:
@@ -239,7 +202,6 @@ rules:
   verbs:
   - create
   - list
-  - update
   - watch
 - apiGroups:
   - rbac.authorization.k8s.io
@@ -256,7 +218,6 @@ rules:
   - serviceaccounts
   verbs:
   - create
-  - get
   - list
   - watch
 {{- end }}
@@ -269,7 +230,6 @@ rules:
   - delete
   - get
   - list
-  - patch
   - update
   - watch
 - apiGroups:
@@ -281,6 +241,5 @@ rules:
   - delete
   - get
   - list
-  - patch
   - update
   - watch
