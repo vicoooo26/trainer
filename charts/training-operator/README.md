@@ -10,7 +10,7 @@ A Helm chart for deploying the Kubeflow Training Operator on Kubernetes. The Tra
 
 ## Notes
 
-To mitigate security risks from over-privileged access, this component has refined its auto-created RBAC rules by removing broad, high-privilege configurations. Since the Launcher Pod requires read and exec access to Worker Pods, users must manually manage permissions for the ServiceAccount used by MPIJobs. Please refer to the example below, which lists the minimum required permissions:
+To mitigate security risks from over-privileged access, this component has refined its auto-created RBAC rules by removing broad, high-privilege configurations. Since the Launcher Pod requires read and exec access to Worker Pods, users must manually manage permissions for the ServiceAccount used by MPIJobs. Alternatively, you can use the [arena CLI](https://github.com/kubeflow/arena/tree/develop-v2), which automatically manages the ServiceAccount and RBAC permissions required by MPIJobs. Please refer to the example below, which lists the minimum required permissions:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -77,7 +77,7 @@ spec:
   ...
 ```
 
-Users assume full responsibility for any security issues arising from manually granting elevated permissions.
+**Users assume full responsibility for any security issues arising from manually granting elevated permissions.**
 
 ---
 
@@ -118,6 +118,12 @@ helm install training-operator ./charts/training-operator \
 Note that by passing the `--create-namespace` flag to the `helm install` command, `helm` will create the release namespace if it does not exist.
 
 See [helm install](https://helm.sh/docs/helm/helm_install) for command documentation.
+
+### Submit training job
+
+After installing the Training Operator, you can submit distributed training jobs by creating CRs (e.g., `PyTorchJob`, `MPIJob`, `TFJob`) directly. See the [Kubeflow Trainer examples](https://github.com/kubeflow/trainer/tree/release-1.9/examples) for CR examples.
+
+Alternatively, you can use [arena-v2](https://github.com/kubeflow/arena/blob/develop-v2/README.md), a command-line tool that simplifies submitting and managing distributed training jobs on Kubernetes. It wraps the CRs above into a friendly CLI, lowering the barrier to running distributed training workloads.
 
 ### Upgrade the chart
 
